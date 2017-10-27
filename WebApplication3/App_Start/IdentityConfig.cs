@@ -18,6 +18,7 @@ namespace WebApplication3
 {
     public class EmailService : IIdentityMessageService
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(EmailService));
         string smtpAddress = System.Configuration.ConfigurationManager.AppSettings["SMTPAddress"];
         string fromUserName = System.Configuration.ConfigurationManager.AppSettings["FromUserName"];
         string userName = System.Configuration.ConfigurationManager.AppSettings["FromEmail"];
@@ -30,26 +31,31 @@ namespace WebApplication3
 
         private async Task configSendGridasync(IdentityMessage message)
         {
-            var smtp = new SmtpClient("smtp.gmail.com", 587);
+            try
+            {
+                var smtp = new SmtpClient("smtp.gmail.com", 587);
+                var creds = new NetworkCredential("aspdotnetmvcnaresh@gmail.com", "Password"); //maid n password
+                smtp.UseDefaultCredentials = false;
+                smtp.Credentials = creds;
+                //smtp.EnableSsl = false;
 
-            var creds = new NetworkCredential("user@gmail.com", "pwd"); //maid n password
+                var to = new MailAddress(message.Destination);
+                var from = new MailAddress("info@ycc.com", "Your Contractor Connection");
 
-            smtp.UseDefaultCredentials = false;
-            smtp.Credentials = creds;
-            smtp.EnableSsl = false;
+                var msg = new MailMessage();
+                smtp.EnableSsl = true;
+                msg.To.Add(to);
+                msg.From = from;
+                msg.IsBodyHtml = true;
+                msg.Subject = message.Subject;
+                msg.Body = message.Body;
 
-            var to = new MailAddress(message.Destination);
-            var from = new MailAddress("info@ycc.com", "Your Contractor Connection");
-
-            var msg = new MailMessage();
-            smtp.EnableSsl = true;
-            msg.To.Add(to);
-            msg.From = from;
-            msg.IsBodyHtml = true;
-            msg.Subject = message.Subject;
-            msg.Body = message.Body;
-
-            await smtp.SendMailAsync(msg);
+                await smtp.SendMailAsync(msg);
+            }
+            catch (Exception ex)
+            {
+                log.Error(ex.ToString());
+            }
         }
 
 

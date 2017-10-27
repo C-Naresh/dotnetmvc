@@ -8,6 +8,7 @@ namespace WebApplication3.Controllers
 {
     public class HomeController : Controller
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(HomeController));
         public ActionResult Index()
         {
             return View();
